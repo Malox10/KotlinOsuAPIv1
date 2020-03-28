@@ -22,7 +22,7 @@ class OsuAPI(private val key: String) {
         beatmapsetID: Long? = null,
         beatmapID: Long? = null,
         user: String? = null,
-        usertype: String? = null,
+        usertype: UserType? = null,
         mode: Mode? = null,
         includeConverts: Converts? = null,
         beatmapHash: String? = null,
