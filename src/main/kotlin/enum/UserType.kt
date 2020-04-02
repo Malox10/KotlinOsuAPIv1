@@ -1,9 +1,8 @@
 package enum
 
-@Suppress("EnumEntryName")
 enum class UserType(private val value: String) {
-    id("id"),
-    string("string");
+    Id("id"),
+    Username("string");
 
     override fun toString() = value
 }
