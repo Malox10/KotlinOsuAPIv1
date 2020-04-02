@@ -1,6 +1,7 @@
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import io.ktor.client.HttpClient
-import io.ktor.client.features.json.GsonSerializer
-import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
 import io.ktor.http.ParametersBuilder
 import io.ktor.http.URLBuilder
@@ -11,10 +12,13 @@ import enum.*
 import json.*
 
 class OsuAPI(private val key: String) {
-    private val client = HttpClient {
-        install(JsonFeature) {
-            serializer = GsonSerializer()
-        }
+    private val gson: Gson
+    private val client = HttpClient()
+
+    init {
+        val gsonBuilder = GsonBuilder()
+        gsonBuilder.registerTypeAdapter(Match.MatchHeader::class.java, MatchHeaderTypeAdapter())
+        gson = gsonBuilder.create()
     }
 
     suspend fun getBeatmaps(
@@ -44,7 +48,8 @@ class OsuAPI(private val key: String) {
                 addIfNotNull("mods", mods)
             }
             RateLimiter.grantAccess()
-            return client.get(buildString())
+            val jsonString = client.get<String>(buildString())
+            return gson.fromJson<List<Beatmap>>(jsonString, beatmapListType)
         }
     }
 
@@ -63,7 +68,8 @@ class OsuAPI(private val key: String) {
                 addIfNotNull("event_days", event_days)
             }
             RateLimiter.grantAccess()
-            return client.get(buildString())
+            val jsonString = client.get<String>(buildString())
+            return gson.fromJson(jsonString, userListType)
         }
     }
 
@@ -79,7 +85,8 @@ class OsuAPI(private val key: String) {
             parameters.run {
 
             }
-            return client.get(buildString())
+            val jsonString = client.get<String>(buildString())
+            return gson.fromJson(jsonString, scoreListType)
         }
     }
 
@@ -149,5 +156,11 @@ class OsuAPI(private val key: String) {
             }
             return
         }
+    }
+
+    companion object{
+        private val beatmapListType = object : TypeToken<List<Beatmap>>() {}.type
+        private val userListType = object : TypeToken<List<User>>() {}.type
+        private val scoreListType = object : TypeToken<List<Score>>() {}.type
     }
 }
