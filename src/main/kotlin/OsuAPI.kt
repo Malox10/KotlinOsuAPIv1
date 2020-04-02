@@ -12,14 +12,7 @@ import enum.*
 import json.*
 
 class OsuAPI(private val key: String) {
-    private val gson: Gson
     private val client = HttpClient()
-
-    init {
-        val gsonBuilder = GsonBuilder()
-        gsonBuilder.registerTypeAdapter(Match.MatchHeader::class.java, MatchHeaderTypeAdapter())
-        gson = gsonBuilder.create()
-    }
 
     suspend fun getBeatmaps(
         since: String? = null,
@@ -118,24 +111,11 @@ class OsuAPI(private val key: String) {
         }
     }
 
-    fun modBuilder(vararg mods: Mods): Long {
-        val modset = mods.toMutableSet()
-        if (mods.contains(Mods.Nightcore) && !(mods.contains(Mods.DoubleTime))) modset.add(Mods.DoubleTime)
-        if (mods.contains(Mods.Perfect) && !(mods.contains(Mods.SuddenDeath))) modset.add(Mods.SuddenDeath)
-        var bitwise: Long = 0
-        for (mod in modset) bitwise += mod.value
-        return bitwise
-    }
-
     private fun getOsuUrlBuilder(): URLBuilder {
         return URLBuilder().apply {
             host = "osu.ppy.sh/api"
             parameters["k"] = key
         }
-    }
-
-    private fun ParametersBuilder.addIfNotNull(name: String, value: Any?) {
-        if (value != null) this[name] = value.toString()
     }
 
     private object RateLimiter {
@@ -162,5 +142,25 @@ class OsuAPI(private val key: String) {
         private val beatmapListType = object : TypeToken<List<Beatmap>>() {}.type
         private val userListType = object : TypeToken<List<User>>() {}.type
         private val scoreListType = object : TypeToken<List<Score>>() {}.type
+        private val gson: Gson
+
+        init {
+            val gsonBuilder = GsonBuilder()
+            gsonBuilder.registerTypeAdapter(Match.MatchHeader::class.java, MatchHeaderTypeAdapter())
+            gson = gsonBuilder.create()
+        }
+
+        fun modBuilder(vararg mods: Mods): Long {
+            val modset = mods.toMutableSet()
+            if (mods.contains(Mods.Nightcore) && !(mods.contains(Mods.DoubleTime))) modset.add(Mods.DoubleTime)
+            if (mods.contains(Mods.Perfect) && !(mods.contains(Mods.SuddenDeath))) modset.add(Mods.SuddenDeath)
+            var bitwise: Long = 0
+            for (mod in modset) bitwise += mod.value
+            return bitwise
+        }
+
+        private fun ParametersBuilder.addIfNotNull(name: String, value: Any?) {
+            if (value != null) this[name] = value.toString()
+        }
     }
 }
