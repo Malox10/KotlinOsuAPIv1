@@ -11,8 +11,13 @@ import kotlinx.coroutines.sync.withLock
 import enum.*
 import json.*
 
-class OsuAPI(private val key: String) {
+class OsuAPI(private val key: String, rateLimit: RateLimit = RateLimit.Standard) {
     private val client = HttpClient()
+    private val rateLimiter: RateLimiter
+
+    init {
+        rateLimiter = RateLimiter(rateLimit.value)
+    }
 
     suspend fun getBeatmaps(
         since: String? = null,
@@ -40,7 +45,7 @@ class OsuAPI(private val key: String) {
                 addIfNotNull("limit", limit)
                 addIfNotNull("mods", mods)
             }
-            RateLimiter.grantAccess()
+            rateLimiter.grantAccess()
             val jsonString = client.get<String>(buildString())
             return gson.fromJson<List<Beatmap>>(jsonString, beatmapListType)
         }
@@ -60,7 +65,7 @@ class OsuAPI(private val key: String) {
                 addIfNotNull("m", mode)
                 addIfNotNull("event_days", event_days)
             }
-            RateLimiter.grantAccess()
+            rateLimiter.grantAccess()
             val jsonString = client.get<String>(buildString())
             return gson.fromJson(jsonString, userListType)
         }
@@ -78,6 +83,7 @@ class OsuAPI(private val key: String) {
             parameters.run {
 
             }
+            rateLimiter.grantAccess()
             val jsonString = client.get<String>(buildString())
             return gson.fromJson(jsonString, scoreListType)
         }
@@ -118,11 +124,9 @@ class OsuAPI(private val key: String) {
         }
     }
 
-    private object RateLimiter {
-        private val queue: MutableList<Long> = mutableListOf()
-        private const val rateLimitAmount: Long = 1200  //1200 requests per minute
-        private const val rateLimitWindowMillis: Long = 60000
+    private class RateLimiter(private val rateLimitAmount: Long) {
         private val mutex: Mutex = Mutex()
+        private val queue: MutableList<Long> = mutableListOf()
 
         suspend fun grantAccess() {
             mutex.withLock {
@@ -130,11 +134,16 @@ class OsuAPI(private val key: String) {
                     if (queue.first() < System.currentTimeMillis()) {
                         queue.removeAt(0)
                         break
-                    } else delay(1000)
+                    } else delay(waitTimeMillis)
                 }
                 queue.add(System.currentTimeMillis() + rateLimitWindowMillis)
             }
             return
+        }
+
+        companion object{
+            private const val waitTimeMillis: Long = 1000
+            private const val rateLimitWindowMillis: Long = 60000
         }
     }
 
