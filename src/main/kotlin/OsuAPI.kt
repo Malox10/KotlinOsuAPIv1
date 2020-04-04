@@ -72,13 +72,13 @@ class OsuAPI(private val key: String, rateLimit: RateLimit = RateLimit.Standard)
     }
 
     suspend fun getScores(
-        beatmapID: Long? = null,
+        beatmapID: Long,
         user: String? = null,
         usertype: UserType? = null,
         mode: Mode? = null,
         mods: Mods? = null,
         limit: Int? = null
-    ): List<Score> {
+    ): List<BeatmapScore> {
         with(getOsuUrlBuilder()) {
             encodedPath = "get_scores"
             parameters.run {
@@ -156,7 +156,7 @@ class OsuAPI(private val key: String, rateLimit: RateLimit = RateLimit.Standard)
     companion object{
         private val beatmapListType = object : TypeToken<List<Beatmap>>() {}.type
         private val userListType = object : TypeToken<List<User>>() {}.type
-        private val scoreListType = object : TypeToken<List<Score>>() {}.type
+        private val beatmapScoreListType = object : TypeToken<List<BeatmapScore>>() {}.type
         private val gson: Gson
 
         init {

@@ -1,6 +1,6 @@
 package json
 
-data class Score(
+data class BeatmapScore(
     val score_id: Long,
     val score: Long,
     val username: String,
