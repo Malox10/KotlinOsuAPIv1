@@ -76,12 +76,18 @@ class OsuAPI(private val key: String, rateLimit: RateLimit = RateLimit.Standard)
         user: String? = null,
         usertype: UserType? = null,
         mode: Mode? = null,
+        mods: Mods? = null,
         limit: Int? = null
     ): List<Score> {
         with(getOsuUrlBuilder()) {
             encodedPath = "get_scores"
             parameters.run {
-
+                addIfNotNull("b",beatmapID)
+                addIfNotNull("u",user)
+                addIfNotNull("m",mode)
+                addIfNotNull("mods",mods)
+                addIfNotNull("limit",limit)
+                addIfNotNull("type",usertype)
             }
             rateLimiter.grantAccess()
             val jsonString = client.get<String>(buildString())
