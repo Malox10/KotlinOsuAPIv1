@@ -96,7 +96,7 @@ class OsuAPI(private val key: String, rateLimit: RateLimit = RateLimit.Standard)
     }
 
     suspend fun getUserBest(
-        user: String? = null,
+        user: String,
         usertype: UserType? = null,
         mode: Mode? = null,
         limit: Int? = null
@@ -116,7 +116,7 @@ class OsuAPI(private val key: String, rateLimit: RateLimit = RateLimit.Standard)
     }
 
     suspend fun getUserRecent(
-        user: String? = null,
+        user: String,
         usertype: UserType? = null,
         mode: Mode? = null,
         limit: Int? = null
