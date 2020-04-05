@@ -91,17 +91,27 @@ class OsuAPI(private val key: String, rateLimit: RateLimit = RateLimit.Standard)
             }
             rateLimiter.grantAccess()
             val jsonString = client.get<String>(buildString())
-            return gson.fromJson(jsonString, scoreListType)
+            return gson.fromJson(jsonString, beatmapScoreListType)
         }
     }
 
-    suspend fun getUserBest() {
+    suspend fun getUserBest(
+        user: String? = null,
+        usertype: UserType? = null,
+        mode: Mode? = null,
+        limit: Int? = null
+    ): List<UserScore> {
         with(getOsuUrlBuilder()) {
             encodedPath = "get_scores"
             parameters.run {
-
+                addIfNotNull("u",user)
+                addIfNotNull("m",mode)
+                addIfNotNull("limit",limit)
+                addIfNotNull("type",usertype)
             }
-            return client.get(buildString())
+            rateLimiter.grantAccess()
+            val jsonString = client.get<String>(buildString())
+            return gson.fromJson(jsonString, userScoreListType)
         }
     }
 
@@ -157,6 +167,7 @@ class OsuAPI(private val key: String, rateLimit: RateLimit = RateLimit.Standard)
         private val beatmapListType = object : TypeToken<List<Beatmap>>() {}.type
         private val userListType = object : TypeToken<List<User>>() {}.type
         private val beatmapScoreListType = object : TypeToken<List<BeatmapScore>>() {}.type
+        private val userScoreListType = object : TypeToken<List<UserScore>>() {}.type
         private val gson: Gson
 
         init {
