@@ -13,6 +13,6 @@ data class RecentUserScore (
    val perfect: Long,
    val enabled_mods: Long,
    val user_id: Long,
-   val date: Long,
-   val rank: Long
+   val date: String,
+   val rank: String
 )
