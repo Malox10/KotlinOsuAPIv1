@@ -139,7 +139,8 @@ class OsuAPI(private val key: String, rateLimit: RateLimit = RateLimit.Standard)
         with(getOsuUrlBuilder()) {
             encodedPath = "get_match"
             parameters.addIfNotNull("mp", matchID)
-            return client.get(buildString())
+            val jsonString = client.get<String>(buildString())
+            return gson.fromJson(jsonString, Match::class.java)
         }
     }
 
