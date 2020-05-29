@@ -12,13 +12,13 @@ data class Match(
         val match_id: Long,
         val name: String,
         val start_time: String,
-        val end_time: String
+        val end_time: String?
     )
 
     data class Game(
         val game_id: Long,
         val start_time: String,
-        val end_time: String,
+        val end_time: String?,
         val beatmap_id: Long,
         val play_mode: Byte,
         val match_type: String, //undocumented
@@ -56,7 +56,7 @@ class MatchHeaderTypeAdapter : TypeAdapter<Match.MatchHeader>() {
             var matchId: Long = 0
             lateinit var name: String
             lateinit var startTime: String
-            lateinit var endTime: String
+            var endTime: String? = null
 
             jsonReader.beginObject()
             while (jsonReader.hasNext()) {
@@ -64,7 +64,14 @@ class MatchHeaderTypeAdapter : TypeAdapter<Match.MatchHeader>() {
                     "match_id" -> matchId = jsonReader.nextLong()
                     "name" -> name = jsonReader.nextString()
                     "start_time" -> startTime = jsonReader.nextString()
-                    "end_time" -> endTime = jsonReader.nextString()
+                    "end_time" -> endTime = when(val thistoken = jsonReader.peek()) {
+                        JsonToken.NULL -> {
+                            jsonReader.nextNull()
+                            null
+                        }
+                        JsonToken.STRING -> jsonReader.nextString()
+                        else -> throw Exception("end_time was expected to be String? found $thistoken")
+                    }
                 }
             }
             jsonReader.endObject()
