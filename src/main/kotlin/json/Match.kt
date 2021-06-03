@@ -37,6 +37,7 @@ data class Match(
             val count50: Int,
             val count100: Int,
             val count300: Int,
+            val countmiss: Int,
             val countgeki: Int,
             val countkatu: Int,
             val perfect: Byte,
