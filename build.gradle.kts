@@ -1,26 +1,29 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.4.30"
+    kotlin("jvm") version "1.8.21"
+    id("io.ktor.plugin") version "2.3.0"
     `maven-publish`
     application
 }
 
 group = "me.malox10"
-version = "1.0.1"
+version = "1.1.0"
 
 repositories {
     mavenCentral()
 }
 
-val ktorVersion = "1.3.0"
+project.setProperty("mainClassName", "me.malox10")
+
+val ktorVersion = "2.3.0"
 
 dependencies {
-    implementation("org.jetbrains.kotlin", "kotlin-stdlib-jdk8")
+    //implementation("org.jetbrains.kotlin", "kotlin-stdlib-jdk8")
     implementation("io.ktor","ktor-client-cio", ktorVersion)
     implementation("io.ktor", "ktor-client-json", ktorVersion)
     implementation("io.ktor", "ktor-client-gson", ktorVersion)
-    implementation("com.google.code.gson","gson", "2.8.6" )
+    implementation("com.google.code.gson","gson", "2.10.1" )
 }
 
 tasks.withType<KotlinCompile> {
